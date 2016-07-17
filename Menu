@@ -1,0 +1,99 @@
+var scene = "menu";
+var mouse = {
+    clicked :false,
+    overButton :false,
+};
+
+var titleFont= function(txt, x, y, c1, c2, rot,size){
+    textFont(createFont("Avenir Bold"));
+    textSize(size);
+    textAlign(CENTER,CENTER);
+
+    fill(c2);
+    for(var i = 0; i < 335; i += 5){
+        text(txt,x+ sin(i) * 5, y + cos(i) * 5);
+    }
+    fill(0,0,0,50);
+    text(txt, x, y+2);
+    fill(c1);
+    text(txt,x,y);
+};
+    
+    
+var button = function(x,y,size,txt,nxt) {
+    textFont(createFont("Avenir Bold"));
+    textAlign(CENTER,CENTER);
+    
+    if(dist(mouseX,mouseY,x,y) <size/2) {
+        mouse.overButton = true;
+        y +=3;
+        x+=3;
+            noStroke();
+        fill(0,0,0,50);
+        ellipse(x,y+size/20,size,size);
+        fill(0, 162, 255);
+        ellipse(x,y,size,size);
+        fill(255,255,255,50);
+        ellipse(x,y-size/20,size,size-size/11.0);
+        fill(255);
+        textSize(size/5);
+        text(txt,x,y);
+        if(mouse.clicked){
+            scene = nxt;
+        }
+    } else {
+        noStroke();
+        fill(0,0,0,50);
+        ellipse(x,y+size/20,size,size);
+        fill(0, 162, 255);
+        ellipse(x,y,size,size);
+        fill(255,255,255,50);
+        ellipse(x,y-size/20,size,size-size/11.0);
+        fill(255);
+        textSize(size/5);
+        text(txt,x,y);
+    }
+};
+    
+draw = function() {
+    background(0, 118, 235);
+    for(var k = -197+sin(frameCount*5)*7; k < 750; k += 149){
+        noStroke();
+        fill(255, 255, 255,k/8);
+
+        beginShape();
+        vertex(7,k);
+        bezierVertex(395,4,5,3,396,k);
+        bezierVertex(399,1,2,3,7,k);
+        endShape();
+    }
+    
+    if(scene === "menu") {
+        titleFont("b u r g e r s\nv s\nd o c t o r s",200,80,color(255, 253, 237),color(0, 200, 255),0,42);
+        
+        button(200,300,100,"p l a y","game");
+        button(100,300,80,"credits","credits");
+        button(300,300,80,"how to","how to");
+    }
+    if(scene === "credits") {
+        fill(255);
+        textSize(20);
+        text("All code is created and designed by\n ___ & ____",200,200);    
+        button(350,350,50,"back","menu");
+    }
+    if(scene === "how to") {
+        fill(255);
+        textSize(20);
+        text("How to play :P",200,200);    
+        button(350,350,50,"back","menu");    
+    }
+    
+    cursor(mouse.overButton ? 'pointer' : 'default');
+     
+    mouse.overButton =false;
+    mouse.clicked = false;
+};
+
+mouseClicked = function() {
+    mouse.clicked = true;    
+};
