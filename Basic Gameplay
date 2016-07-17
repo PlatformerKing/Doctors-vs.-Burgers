@@ -1,0 +1,209 @@
+textAlign(CENTER, CENTER);
+textFont(createFont("Avenir Bold"));
+
+var keys = [];
+keyPressed = function(){ keys[keyCode] = true; };
+keyReleased = function(){ keys[keyCode] = false; };
+
+// The rectangle collision function
+var rectCollide = function(one, two){
+    if( one.x+one.w > two.x &&
+        one.y+one.h > two.y &&
+        one.x < two.x+two.w &&
+        one.y < two.y+two.h){
+        return true;
+    }
+};
+var collide = function(a, b, which){
+    if(which === 'L'){
+        return a.x < b.x + b.w && a.y < b.y + b.h && a.y + a.h > b.y && a.x + (a.w / 2) > b.x;
+    } else if (which === 'R'){
+        return a.x < b.x + (b.w/2) && a.y < b.y + b.h && a.y + a.h > b.y && a.x + a.w > b.x;
+    } else if (which === 'U'){
+        return a.x < b.x + b.w && a.y < b.y + b.h && a.y + (a.h/2) > b.y && a.x + a.w > b.x;
+    } else {
+        return a.x < b.x + b.w && a.y < b.y + (b.h/2) && a.y + a.h > b.y && a.x + a.w > b.x;
+    }
+};
+var rect2 = function(x, y, w, h){
+    fill(153, 84, 49);
+    rect(x, y, w, h, 2);
+    fill(0, 0 ,0, 30);
+    triangle(x, y, x + w, y, x, y + h);
+};
+
+var images = {
+    block: function(){
+        noStroke();
+        fill(102, 34, 0);
+        rect(1, 1, 28, 28);
+        fill(153, 84, 49);
+        rect2(0, 0, 30 / 2.2, 30 / 3);
+        rect2(16, 0, 30 / 2.2, 30 / 3);
+        rect2(0, 20, 30 / 2.2, 30 / 3);
+        rect2(16, 20, 30 / 2.2, 30 / 3);
+        rect2(8, 11, 30 / 2.2, 30 / 4);
+        rect2(24, 11, 30 / 4.7, 30 / 4);
+        rect2(0, 11, 30 / 4.7, 30 / 4);
+        
+        return get(0, 0, 30, 30);
+    },
+    burger: function(){
+        noStroke();
+        fill(120, 84, 0);
+        (rect)(-2, 10, 29, 20/4, 10);
+        fill(219, 169, 52);
+        arc(25/2, 5, 25, 20 / 2, -180, 0);
+        rect(0, 5, 25, 20/4);
+        (rect)(0, 15, 25, 20/4, 0, 0, 30, 30);
+        fill(0, 0, 0, 30);
+        (rect)(-2, 10, (25 + 4) / 2, 20/4, 10);
+        arc(25/2, 5, 25, 20 / 2, -180, -90);
+        rect(0, 5, 25 / 2, 20/4);
+        (rect)(0, 15, 25 / 2, 20/4, 0, 0, 30, 30);
+        
+        return get(0, 0, 25, 20);
+    },
+};
+
+var block = function(x, y){
+    this.x = x;
+    this.y = y;
+    this.w = 30;
+    this.h = 30;
+};
+block.prototype.draw = function() {
+    image(images.block, this.x, this.y);
+};
+
+var level = [
+    '....................',
+    '.             .    .',
+    '.             .    .',
+    '...           .    .',
+    '.      ...    .    .',
+    '.      .      .... .',
+    '.       .          .',
+    '...    .           .',
+    '.                  .',
+    '.              .   .',
+    '.              .   .',
+    '.            .  .  .',
+    '.              .   .',
+    '...    ..          .',
+    '.      ...         .',
+    '.      .           .',
+    '.      .       ... .',
+    '...    .       .   .',
+    '.             ..   .',
+    '....................',
+];
+var levelArray = [];
+
+var drawLevel = function(which){
+    for(var i in which){
+        for(var j in which[i]){
+            var letter = which[j].charAt(i);
+            
+            switch(letter){
+                case '.':
+                    levelArray.push(new block(i * 30, j * 30));
+                    break;
+            }
+        }
+    }
+};
+drawLevel(level);
+
+var Player = function(){
+    this.x = 50;
+    this.y = 50;
+    this.w = 25;
+    this.h = 20;
+    
+    this.speed = 3;
+};
+Player.prototype.draw = function() {
+    pushMatrix();
+    translate(this.x, this.y);
+    /*noStroke();
+    fill(120, 84, 0);
+    (rect)(-2, 10, this.w + 4, this.h/4, 10);
+    fill(219, 169, 52);
+    arc(this.w/2, 5, this.w, this.h / 2, -180, 0);
+    rect(0, 5, this.w, this.h/4);
+    (rect)(0, 15, this.w, this.h/4, 0, 0, 30, 30);
+    fill(0, 0, 0, 30);
+    (rect)(-2, 10, (this.w + 4) / 2, this.h/4, 10);
+    arc(this.w/2, 5, this.w, this.h / 2, -180, -90);
+    rect(0, 5, this.w / 2, this.h/4);
+    (rect)(0, 15, this.w / 2, this.h/4, 0, 0, 30, 30);*/
+    image(images.burger, 0, 0);
+    popMatrix();
+    
+    if(keys[RIGHT]){
+        this.xvel ++;
+    }
+    if(keys[LEFT]){
+        this.xvel --;
+    }
+    if(keys[DOWN]){
+        this.yvel ++;
+    }
+    if(keys[UP]){
+        this.yvel --;
+    }
+    
+    if(!keys[RIGHT] && !keys[LEFT]){
+        this.xvel /= 1.1;
+    }
+    if(!keys[UP] && !keys[DOWN]){
+        this.yvel /= 1.1;
+    }
+    if(this.xvel < 0.1 && this.xvel > -0.1){ this.xvel = 0; }
+    if(this.yvel < 0.1 && this.yvel > -0.1){ this.yvel = 0; }
+    
+    if(keys[LEFT]){ this.x -= this.speed; }
+    if(keys[RIGHT]){ this.x += this.speed; }
+    for(var i in levelArray){
+        if(rectCollide(this, levelArray[i]) && keys[LEFT]){
+            this.x += this.speed;
+        }
+        if(rectCollide(this, levelArray[i]) && keys[RIGHT]){
+            this.x -= this.speed;
+        }
+    }
+    
+    if(keys[UP]){ this.y -= this.speed; }
+    if(keys[DOWN]){ this.y += this.speed; }
+    for(var i in levelArray){
+        if(rectCollide(this, levelArray[i]) && keys[UP]){
+            this.y += this.speed;
+        }
+        if(rectCollide(this, levelArray[i]) && keys[DOWN]){
+            this.y -= this.speed;
+        }
+    }
+};
+var player = new Player();
+
+draw = function() {
+    for(var i in images){
+        if (typeof images[i] !== "object") {
+            colorMode(RGB, 255);
+            background(0, 0, 0, 0);
+            images[i] = images[i]();
+        }
+    }
+    
+    background(245);
+    for(var i in levelArray){
+        levelArray[i].draw();
+    }
+    player.draw();
+    
+    background(255);
+    textSize(50);
+    fill(0, 0, 0, 100);
+    text('DO NOT VOTE UP.', 300, 300);
+};
